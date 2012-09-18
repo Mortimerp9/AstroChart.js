@@ -164,7 +164,7 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 	var i;
 	var last_angle = south?180:360;
 	var sign_pos = Math.floor(houses[1]/30)+1;
-  var degmin = 	displayDegMinute(houses[1], center_x-outer2_radius-2*radius/30,center_y,(south)?180:0);
+  var degmin = 	displayDegMinute(houses[1], center_x-outer2_radius-2*radius/30,center_y,(south)?180:0, 1);
 					  var glyph = paper.print(center_x-outer2_radius-(radius/10),center_y, astro_glyph('sign',sign_pos), hamburg, big_gliph)
 		.attr({fill: color(sign_pos)});
 		  if(south) glyph.transform('r180,'+center_x+','+center_y+'r180');
@@ -208,7 +208,7 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 			.attr({fill: inner_text_color, 'font-size': small_gliph})
 		.transform("r"+midAngle+","+center_x+","+center_y+"r"+(-midAngle));
 
-		degmin = displayDegMinute(houses[i], center_x-outer2_radius-2*radius/30,center_y, angle);
+		degmin = displayDegMinute(houses[i], center_x-outer2_radius-2*radius/30,center_y, angle, i);
 
 		//house glyph
 		glyph = paper.print(center_x-outer2_radius-radius/10,center_y, astro_glyph('sign',sign_pos), hamburg, big_gliph).transform("r"+angle+","+center_x+","+center_y+"r-"+(angle))
@@ -237,13 +237,17 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 	longitude.sort(function(a, b) {return multiplier*a.angle-multiplier*b.angle;});
 
 	last_angle = 360;
-	var lastArc = true;
+	var lastArc = true; //true: top, false: bottom
+	var lastTopBbox;
+	var lastBottomBBox;
+	var topArc = outer2_radius-5;
+	var bottomArc = (outer2_radius+inner_radius+5)/2;
 	for(i=0; i<longitude.length; i++) {
 		if(longitude[i] != undefined) {
 			var angle = -(longitude[i].angle-Ascendant);
 			if(south) angle = 180-angle;
 
-			var degmin = degMinute(longitude[i].angle);
+			degmin = degMinute(longitude[i].angle);
 			sign_pos = Math.floor(longitude[i].angle/30)+1;
 			longitude[i].degree = degmin[0];
 			longitude[i].minute = degmin[1];
@@ -257,33 +261,78 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 			if(longitude[i].planet != 15 && longitude[i].planet!= 16) {
 				var straight = Ascendant-longitude[i].angle;
 				if(south) straight = 180-straight;
-				var arc = outer2_radius-5;
-				//TODO use raphael bbox instead
-				if(lastArc && Math.ceil(last_angle-angle) < 4) {
-					lastArc = false;
-					arc = (outer2_radius+inner_radius+5)/2;
-				} else {
-					lastArc = true;
-				}
 				last_angle = angle;
 
 				if(straight < 0) straight = straight+360;
 
+				var arc = topArc;
 				//planet
-				glyph = paper.print(center_x-arc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
+				glyph = paper.print(center_x-topArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
 					.attr({fill: text_color})
 					.transform("r"+angle+","+center_x+","+center_y+"r-"+(straight));
-
+				//check if we are stepping on something
+				var bbox = glyph.getBBox();
+				var mvAngle =0;
+				if((lastArc && lastTopBbox != undefined && Raphael.isBBoxIntersect(bbox, lastTopBbox))) {
+					//there is no space on the top line, so try the bottom arc
+					console.log("ouch..",longitude[i].planet);
+					glyph.remove();
+					glyph = paper.print(center_x-bottomArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
+						.attr({fill: text_color})
+						.transform("r"+angle+","+center_x+","+center_y+"r-"+(straight));
+					bbox = glyph.getBBox();
+					if(lastBottomBBox != undefined && Raphael.isBBoxIntersect(bbox, lastBottomBBox)) {
+						//bottom arc is used already, we are gone move along the top arc until there is space
+						console.log("busy down there..",longitude[i].planet);
+						mvAngle = 0;
+						do{
+							mvAngle+=1;
+							glyph.remove();
+							if(lastArc) {
+								arc = bottomArc;
+								//the last we put was at the top, so there will be more place at the bottom
+								glyph = paper.print(center_x-bottomArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
+									.attr({fill: text_color})
+									.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
+							} else {
+								arc = topArc;
+								//the last we put was at the top, so there will be more place at the bottom
+								glyph = paper.print(center_x-topArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
+									.attr({fill: text_color})
+									.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
+							}
+							bbox = glyph.getBBox();
+						} while((Raphael.isBBoxIntersect(bbox, lastTopBbox) && !lastArc) //we are trying on the top arc
+								|| (Raphael.isBBoxIntersect(bbox, lastBottomBBox) && lastArc)); //we are trying on the bottom arc
+						if(arc == topArc) {
+							lastArc = true;
+							lastTopBbox = bbox;
+						} else {
+							lastArc = false;
+							lastBottomBBox = bbox;
+						}
+						console.log("moved", lastArc, mvAngle, longitude[i].planet);
+					} else {
+						console.log("gone down",longitude[i].planet);
+						lastArc = false;
+						arc = bottomArc;
+						lastBottomBBox = bbox;
+					}
+				} else {
+					console.log("we are good",longitude[i].planet);
+					lastTopBbox = bbox;
+					lastArc = true;
+				}
+				glyph.attr({fill: text_color, 'fill-opacity': 100});
 				glyph.node.id= "planet-"+longitude[i].planet;
 				glyph.id= "planet-"+longitude[i].planet;
 
 				if(settings.planetHover != null) {
-					bbox = glyph.getBBox();
 					glyph = paper.rect(bbox.x-5, bbox.y-5, bbox.width+5, bbox.height+5)
 						.attr({fill: "white", stroke: 'none', 'fill-opacity':0})
 						.hover(
-							utils.mkClosure(longitude[i], function(pl, evt, el) {settings.planetHover.f_in(pl, evt, el);}),
-							utils.mkClosure(longitude[i], function(pl, evt, el) {settings.planetHover.f_out(pl, evt, el);})
+							utils.mkClosure(longitude[i], function(pl, evt, el) {if(settings.planetHover.f_in != undefined) settings.planetHover.f_in(pl, evt, el);}),
+							utils.mkClosure(longitude[i], function(pl, evt, el) {if(settings.planetHover.f_out != undefined) settings.planetHover.f_out(pl, evt, el);})
 						);
 					glyph.node.id= "planet-hover-"+longitude[i].planet;
 					glyph.id= "planet-hover-"+longitude[i].planet;
@@ -293,20 +342,20 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 				//degree
 				paper.text(center_x-arc+(mid_gliph+mid_gliph/4),center_y, degmin[0]+String.fromCharCode(176))
 					.attr({'font-size': tiny_text, fill: text_color})
-					.transform("r"+angle+","+center_x+","+center_y+"r-"+(straight));
+					.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 				//sign
 				paper.print(center_x-arc+(mid_gliph+small_gliph),center_y, astro_glyph('sign',sign_pos), hamburg, small_gliph)
 					.attr({fill: color(sign_pos)})
-					.transform("r"+angle+","+center_x+","+center_y+"r-"+(straight));
+					.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 				//minutes
 				paper.text(center_x-arc+(mid_gliph+2*small_gliph+mid_gliph/3),center_y, degmin[1]+String.fromCharCode(39))
 					.attr({'font-size': tiny_text, fill: text_color})
-					.transform("r"+angle+","+center_x+","+center_y+"r-"+(straight));
+					.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 				//Rx symbol
 				if(isRetrograde) {
 					paper.print(center_x-arc+(mid_gliph+3*small_gliph+mid_gliph/5),center_y, String.fromCharCode(62), hamburg, small_gliph)
 						.attr({fill: red})
-						.transform("r"+angle+","+center_x+","+center_y+"r-"+(straight));
+						.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 				}
 			}
 
@@ -407,13 +456,13 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 		return [deg, minute];
 	}
 
-	function displayDegMinute(hc, x, y, angle) {
+	function displayDegMinute(hc, x, y, angle, i) {
 		var degmin = degMinute(hc);
 		var deg = degmin[0];
 		var minute = degmin[1];
 		var dir = 20*radius/300;
-		if(i >= 1 && i <= 6) dir *= 1;
-		else dir *= -1;
+		if(i >= 1 && i <= 6) dir *= multiplier*1;
+		else dir *= -1*multiplier;
 		paper.text(x, y-dir, deg+String.fromCharCode(176))
 			.attr({'font-size': small_gliph, fill: outer_text_color})
 			.transform("r"+angle+","+center_x+","+center_y+"r-"+(angle));

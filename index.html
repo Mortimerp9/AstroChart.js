@@ -30,7 +30,7 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
         <script src="raphael-min.js"></script>
 		<script src="hamburgsymbols.cufonfonts.js"></script>
-		<script src="debug2.js"></script>
+		<script src="debug.js"></script>
 		<script src="utils.js"></script>
         <script src="natal.js"></script>
 		<script src="bootstrap.min.js"></script>
@@ -47,7 +47,8 @@
 							   angles.text(50,250/2, i).transform("r"+i+","+250/2+','+250/2);;
 							  }
 
-		  drawNatalChart('chart', 250, longitude, hc, true, {});
+		  drawNatalChart('chart', 250, longitude, hc, true, {planetHover: {f_in: function(pl) {console.log(pl.planet);}}});
+							   console.log("----------------------------------------------------------------------");
 		  drawNatalChart('chart2', 250, longitude, hc, false, {});
 		</script>
     </body>
