@@ -248,7 +248,9 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 
 			if(longitude[i].planet != 15 && longitude[i].planet!= 16) {
 				var angle = -(longitude[i].angle-Ascendant);
+				if(south) angle += 180;
 				var straight = Ascendant-longitude[i].angle;
+				if(south) straight += 180;
 				var arc = outer2_radius-5;
 				//TODO use raphael bbox instead
 				if(lastArc && Math.ceil(last_angle-angle) < 4) {
