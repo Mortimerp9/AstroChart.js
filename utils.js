@@ -1,6 +1,6 @@
 var utils = {
 	mkClosure: function(i, fn) {
-		return function(evt) {fn(i, evt);};
+		return function(evt) {fn(i, evt, this);};
 	},
 
 	deg2rad: function(deg) {

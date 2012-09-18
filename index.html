@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
 	  <link rel="stylesheet" href="bootstrap.min.css" type="text/css">
@@ -8,7 +9,14 @@
     <body>
         <h1>Natal Chart</h1>
 
-        <div id="chart"/>
+		<div class="row">
+        <div class="span7 well" id="chart">
+		  &nbsp;
+		  </div>
+        <div class="span7 well" id="chart2">		  &nbsp;
+		  </div>
+
+		</div>
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
         <script src="raphael-min.js"></script>
@@ -18,40 +26,8 @@
         <script src="natal.js"></script>
 		<script src="bootstrap.min.js"></script>
 		<script>
-		  drawNatalChart('chart', 300, longitude, hc,
-		  {
-		  outer_color: '#400738',
-		  outer_text_color: '#F2F2F2',
-		  inner_color: '#CC52BB',
-		  outer_background_color: '#800D70',
-		  inner_background_color: '#F2F2F2',
-		  outer_stroke1: "black",
-		  outer_stroke2: "white",
-		  inner_text_color: '#F2F2F2',
-		  inner_stroke1: "white",
-		  inner_stroke2: "black",
-		  text_color: '#F2F2F2',
-		  red: '#FF083B',
-		  green: '#AAB300',
-		  blue: '#0BCCBE',
-		  houseHover: {
-		  f_in: function(house, evt) { $('#chart #house-'+house).popover('show')},
-		  f_out: function(house, evt) { $('#chart #house-'+house).popover('hide')}
-		  },
-		  planetHover: {
-		  f_in: function(pl, evt) {
-		  var popdata = $('#chart #planet-'+pl.planet).data('popover');
-		  popdata.options.content = "sign: "+pl.sign;
-		  $('#chart #planet-'+pl.planet).popover('show')},
-		  f_out: function(pl, evt) { $('#chart #planet-'+pl.planet).popover('hide')}
-		  }});
-		  var i;
-		  for(i=0;i<=12;i++) {
-							$('#chart #house-'+i).popover({trigger:'manual', title: "House "+i});
-							}
-		  for(i=0;i<longitude.length;i++) {
-							$('#chart #planet-'+i).popover({trigger:'manual', title: "Planet "+i});
-							}
+		  drawNatalChart('chart', 250, longitude, hc, true, {});
+		  drawNatalChart('chart2', 250, longitude, hc, false, {});
 		</script>
     </body>
 </html>
