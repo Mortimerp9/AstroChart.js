@@ -8,7 +8,11 @@
     </head>
     <body>
         <h1>Natal Chart</h1>
-
+		<div class="row">
+		  <div class="span7 well" id="angles">
+		  &nbsp;
+		  </div>
+		</div>
 		<div class="row">
         <div class="span7 well" id="chart">
 		  &nbsp;
@@ -26,6 +30,12 @@
         <script src="natal.js"></script>
 		<script src="bootstrap.min.js"></script>
 		<script>
+		  var angles =  Raphael('angles', 250, 250);
+		  var i = 0;
+		  for(i=0;i<360;i+=10) {
+							  utils.drawLine(250/2,250/2, 0, 250/2, angles).transform("r"+i+","+250/2,+','+250/2);
+							  }
+
 		  drawNatalChart('chart', 250, longitude, hc, true, {});
 		  drawNatalChart('chart2', 250, longitude, hc, false, {});
 		</script>
