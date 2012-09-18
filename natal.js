@@ -335,10 +335,10 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 						   longitude[j].planet != 15 &&
 						   longitude[j].planet != 16) {
 
-							x1 = (inner_radius) * Math.cos(utils.deg2rad(longitude[i].angle-Ascendant));
-							y1 = (inner_radius) * Math.sin(utils.deg2rad(longitude[i].angle-Ascendant));
-							x2 = (inner_radius) * Math.cos(utils.deg2rad(longitude[j].angle-Ascendant));
-							y2 = (inner_radius) * Math.sin(utils.deg2rad(longitude[j].angle-Ascendant));
+							x1 = (inner_radius) * Math.cos(utils.deg2rad((south?180:0)+longitude[i].angle-Ascendant));
+							y1 = (inner_radius) * Math.sin(utils.deg2rad((south?180:0)+longitude[i].angle-Ascendant));
+							x2 = (inner_radius) * Math.cos(utils.deg2rad((south?180:0)+longitude[j].angle-Ascendant));
+							y2 = (inner_radius) * Math.sin(utils.deg2rad((south?180:0)+longitude[j].angle-Ascendant));
 							var line = utils.drawLine(center_x-x1,center_y+y1,center_x-x2,center_y+y2, paper, aspect_color);
 							line.node.id="conjunction"+longitude[i].planet+"t"+longitude[j].planet;
 							line.id="conjunction"+longitude[i].planet+"t"+longitude[j].planet;
