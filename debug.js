@@ -1,3 +1,19 @@
+/** This file is part of AstroChart.js
+  *
+  *    AstroChart.js is free software: you can redistribute it and/or modify
+  *    it under the terms of the GNU Affero General Public License as published by
+  *    the Free Software Foundation, either version 3 of the License, or
+  *    (at your option) any later version.
+  *
+  *    AstroChart.js is distributed in the hope that it will be useful,
+  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *    GNU General Public License for more details.
+  *
+  *    You should have received a copy of the GNU Affero General Public License
+  *    along with AstroChart.js.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
 var hc = [];
 hc[1] = 237.166;
 hc[2] = 267.25;
@@ -23,9 +39,3 @@ longitude[6] = {planet: 6, angle: 162.13, house: 10};
 longitude[7] = {planet: 7, angle: 94.76, house: 8};
 longitude[8] = {planet: 8, angle: 194.33, house: 11};
 longitude[9] = {planet: 9, angle: 137.42, house: 9};
-//longitude[10] = {planet: 10, angle: 244.166, house: 1};
-//longitude[11] = {planet: 11, angle: 17.166, house: 5};
-//longitude[12] = {planet: 12, angle: 16.66, house: 5};
-//longitude[13] = {planet: 13, angle: 239.75, house: 1};
-//longitude[14] = {planet: 14, angle: 109.85, house: 8};
-
