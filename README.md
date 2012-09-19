@@ -15,7 +15,7 @@ The arguments are as follow:
 * containerID, the id of the html container for the chart
 * radius, the radius of the wheel
 * longitudes, an array of object representing the position of the astros, of the form `{planet: 0, angle: 179.33, house: 10}`. The order of the array is not important.
-* houses, an array of longitudes for the houses. Houses have to be passed in order.
+* houses, an array of longitudes for the houses. Houses have to be passed in order and indexed from 1.
 * inSouthernHemisphere, if the person was born in the Southern Hemisphere, then the chart is drawn in the other direction
 * options are optional settings described bellow.
 
