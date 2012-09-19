@@ -178,7 +178,7 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 
 	//houses
 	var i;
-	var last_angle = 360;
+	var last_angle = south?180:360;
 	var sign_pos = Math.floor(houses[1]/30)+1;
   var degmin = 	displayDegMinute(houses[1], center_x-outer2_radius-2*radius/30,center_y,(south)?180:0);
 					  var glyph = paper.print(center_x-outer2_radius-(radius/10),center_y, astro_glyph('sign',sign_pos), hamburg, big_gliph)
@@ -200,14 +200,17 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 
 	for(i=2; i<=12;i++) {
 	  var angle = (Ascendant-houses[i]);
-	  if(south) angle += 180;
+	  if(south) angle = 180-angle;
+
 		sign_pos = Math.floor(houses[i]/30)+1;
 
-		if(angle < 0) angle = angle+360;
+		if(angle < 0) {
+			angle += 360;
+		}
+		if(angle>360) angle -= 360;
+		var midAngle = (angle-(angle-last_angle)/2);
 
-		var midAngle;
-		midAngle = multiplier*(angle-(angle-last_angle)/2);
-
+		if(Math.floor(angle) == 0) midAngle = 180+last_angle/2;
 		if(i == 10) {
 		  utils.drawArrow(x1,center_y,x2,center_y, paper, line_color, multiplier*Math.abs(x2-x1)/10, multiplier*Math.abs(x2-x1)/20).transform("r"+(angle+(south?180:0))+","+center_x+","+center_y);
 		} else {
@@ -242,17 +245,21 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 	}
 	var midAngle;
 	midAngle = last_angle/2;
+	if(south) midAngle = 180+(last_angle-180)/2;
 	paper.text(center_x-inner_radius-radius/30,center_y, 12)
 		.attr({fill: inner_text_color, 'font-size': small_gliph})
 		.transform("r"+midAngle+","+center_x+","+center_y+"r-"+(midAngle));
 
-	longitude.sort(function(a, b) {return a.angle-b.angle;});
+	longitude.sort(function(a, b) {return multiplier*a.angle-multiplier*b.angle;});
 
 	last_angle = 360;
 	var lastArc = true;
 	for(i=0; i<longitude.length; i++) {
 		if(longitude[i] != undefined) {
-			degmin = degMinute(longitude[i].angle);
+			var angle = -(longitude[i].angle-Ascendant);
+			if(south) angle = 180-angle;
+
+			var degmin = degMinute(longitude[i].angle);
 			sign_pos = Math.floor(longitude[i].angle/30)+1;
 			longitude[i].degree = degmin[0];
 			longitude[i].minute = degmin[1];
@@ -260,11 +267,12 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 			longitude[i].sign_color = color(sign_pos);
 			longitude[i].retrograde = isRetrograde;
 			planets[longitude[i].planet] = longitude[i];
+
 			var isRetrograde = retrograde.substring(longitude[i].planet,longitude[i].planet+1).toUpperCase() === 'R';
 
 			if(longitude[i].planet != 15 && longitude[i].planet!= 16) {
-				var angle = -(longitude[i].angle-Ascendant);
 				var straight = Ascendant-longitude[i].angle;
+				if(south) straight = 180-straight;
 				var arc = outer2_radius-5;
 				//TODO use raphael bbox instead
 				if(lastArc && Math.ceil(last_angle-angle) < 4) {
@@ -349,10 +357,10 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 						   longitude[j].planet != 15 &&
 						   longitude[j].planet != 16) {
 
-							x1 = (inner_radius) * Math.cos(utils.deg2rad(longitude[i].angle-Ascendant));
-							y1 = (inner_radius) * Math.sin(utils.deg2rad(longitude[i].angle-Ascendant));
-							x2 = (inner_radius) * Math.cos(utils.deg2rad(longitude[j].angle-Ascendant));
-							y2 = (inner_radius) * Math.sin(utils.deg2rad(longitude[j].angle-Ascendant));
+							x1 = (inner_radius) * Math.cos(utils.deg2rad(multiplier*((south?-180:0)+longitude[i].angle-Ascendant)));
+							var y1 = (inner_radius) * Math.sin(utils.deg2rad(multiplier*((south?-180:0)+longitude[i].angle-Ascendant)));
+							x2 = (inner_radius) * Math.cos(utils.deg2rad(multiplier*((south?-180:0)+longitude[j].angle-Ascendant)));
+							var y2 = (inner_radius) * Math.sin(utils.deg2rad(multiplier*((south?-180:0)+longitude[j].angle-Ascendant)));
 							var line = utils.drawLine(center_x-x1,center_y+y1,center_x-x2,center_y+y2, paper, aspect_color);
 							line.node.id="conjunction"+longitude[i].planet+"t"+longitude[j].planet;
 							line.id="conjunction"+longitude[i].planet+"t"+longitude[j].planet;
