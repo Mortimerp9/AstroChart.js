@@ -291,7 +291,6 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 				var mvAngle =0;
 				if((lastArc && lastTopBbox != undefined && Raphael.isBBoxIntersect(bbox, lastTopBbox))) {
 					//there is no space on the top line, so try the bottom arc
-					console.log("ouch..",longitude[i].planet);
 					glyph.remove();
 					glyph = paper.print(center_x-bottomArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
 						.attr({fill: text_color})
@@ -299,7 +298,6 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 					bbox = glyph.getBBox();
 					if(lastBottomBBox != undefined && Raphael.isBBoxIntersect(bbox, lastBottomBBox)) {
 						//bottom arc is used already, we are gone move along the top arc until there is space
-						console.log("busy down there..",longitude[i].planet);
 						mvAngle = 0;
 						do{
 							mvAngle+=1;
@@ -327,15 +325,12 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 							lastArc = false;
 							lastBottomBBox = bbox;
 						}
-						console.log("moved", lastArc, mvAngle, longitude[i].planet);
 					} else {
-						console.log("gone down",longitude[i].planet);
 						lastArc = false;
 						arc = bottomArc;
 						lastBottomBBox = bbox;
 					}
 				} else {
-					console.log("we are good",longitude[i].planet);
 					lastTopBbox = bbox;
 					lastArc = true;
 				}
