@@ -22,7 +22,7 @@ The arguments are as follow:
 
 Check out `index.html` for a basic example. `debug.js`, `debug2.js`, `debug3.js` provide different astros' positions to test configurations.
 
-If now list of house positions is provided, we assume that the time of birth is unknown and we draw a whole sign chart without the moon/MH/Ascendant. The 1st house is taken as being the sun's sign.
+If now list of house positions is provided, we assume that the time of birth is unknown and we draw a whole house chart without the moon/MH/Ascendant. The 1st house is taken as being the sun's sign.
 
 Dependencies
 ------------
