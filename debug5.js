@@ -13,7 +13,7 @@
   *    You should have received a copy of the GNU Affero General Public License
   *    along with AstroChart.js.  If not, see <http://www.gnu.org/licenses/>.
   */
-
+//Barbara
 var hc = [0,
 		  234.00399780273438,
 		  261.0530090332031,
