@@ -190,6 +190,9 @@ function drawNatalChart(id, radius, params, options) {
 		//Ascendant
 		utils.drawArrow(x1, center_y, x2, center_y, paper, settings.ascendant_color, multiplier*Math.abs(x2-x1)/10, multiplier*Math.abs(x2-x1)/20);
 
+		//the fixed house line
+		var fixed = utils.drawLine(0,center_y,outer2_thick,center_y, paper, settings.outer_line)
+			.transform('r'+multiplier*reduce(Ascendant)+','+center_x+','+center_y);
 		//houses
 		var i;
 		var last_angle = south?180:360;
@@ -225,6 +228,10 @@ function drawNatalChart(id, radius, params, options) {
 			if(angle>360) angle -= 360;
 			var midAngle = (angle-(angle-last_angle)/2);
 
+			//the fixed house line
+			utils.drawLine(0,center_y,outer2_thick,center_y, paper, settings.outer_line)
+				.transform('r'+(multiplier*(i-1)*30)+','+center_x+','+center_y)
+				.transform('...r'+multiplier*reduce(Ascendant)+','+center_x+','+center_y);
 
 			if(Math.floor(angle) == 0) midAngle = 180+last_angle/2;
 			if(i == 10) {
@@ -322,11 +329,9 @@ function drawNatalChart(id, radius, params, options) {
 
 			}
 			//Assign planets to houses
-			console.log('planet, h, sign, realHouse, housePos');
 			for(i=0; i<longitude.length; i++) {
 				if(longitude[i] != undefined) {
 					var sign_pos = Math.floor(longitude[i].angle/30)+1;
-					console.log(longitude[i].planet, longitude[i].house, sign_pos, pos_translate[sign_pos], houses[pos_translate[sign_pos]], reduce(longitude[i].angle));
 					longitude[i].house = pos_translate[sign_pos];
 				}
 			}

@@ -22,6 +22,8 @@ The arguments are as follow:
 
 Check out `index.html` for a basic example. `debug.js`, `debug2.js`, `debug3.js` provide different astros' positions to test configurations.
 
+If now list of house positions is provided, we assume that the time of birth is unknown and we draw a whole sign chart without the moon/MH/Ascendant. The 1st house is taken as being the sun's sign.
+
 Dependencies
 ------------
 
@@ -43,6 +45,7 @@ You can set these following customization variables when drawing the chart:
 * outer_color the color of the outer circle
 * outer_text_color the color of the text within the outer circle
 * outer_text_stroke color of the stroke around the house glyphs, this is useful if you have issue with contrast
+* outer_line is the color of the fixed house marker
 * inner_color the color of the inner circle
 * inner_text_color ...
 * inner_text_stroke color of the stroke around the house numbers
