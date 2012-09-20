@@ -8,15 +8,16 @@ Usage
 
 You can draw a chart by calling `drawNataChart` method:
 ```javascript
-		  drawNatalChart(containerID, radius, longitudes, houses, inSouthernHemisphere, options);
+		  drawNatalChart(containerID, radius, params, options);
 ```
 
 The arguments are as follow:
 * containerID, the id of the html container for the chart
 * radius, the radius of the wheel
-* longitudes, an array of object representing the position of the astros, of the form `{planet: 0, angle: 179.33, house: 10}`. The order of the array is not important.
-* houses, an array of longitudes for the houses. Houses have to be passed in order and indexed from 1.
-* inSouthernHemisphere, if the person was born in the Southern Hemisphere, then the chart is drawn in the other direction
+* params, an array of parameters for the chart:
+    * `longitude`, an array of object representing the position of the astros, of the form `{planet: 0, angle: 179.33, house: 10}`. The order of the array is not important.
+    * `houses`, an array of longitudes for the houses. Houses have to be passed in order and indexed from 1.
+    * `south`, if the person was born in the Southern Hemisphere, then the chart is drawn in the other direction
 * options are optional settings described bellow.
 
 Check out `index.html` for a basic example. `debug.js`, `debug2.js`, `debug3.js` provide different astros' positions to test configurations.
@@ -36,13 +37,15 @@ Configuration
 You can set these following customization variables when drawing the chart:
 
 * red
-* green 
-* orange 
+* green
+* orange
 * blue
 * outer_color the color of the outer circle
 * outer_text_color the color of the text within the outer circle
+* outer_text_stroke color of the stroke around the house glyphs, this is useful if you have issue with contrast
 * inner_color the color of the inner circle
 * inner_text_color ...
+* inner_text_stroke color of the stroke around the house numbers
 * outer_background_color the background color within the outside circle
 * inner_background_color the background color within the inner circle
 * outer_stroke1 the stroke color on the outside of the outer circle

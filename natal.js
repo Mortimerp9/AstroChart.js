@@ -79,7 +79,7 @@ function astro_glyph(type, idx) {
 	sign_glyph[7] = String.fromCharCode(106);
 	sign_glyph[8] = String.fromCharCode(107);
 	sign_glyph[9] = String.fromCharCode(108);
-	sign_glyph[10] = String.fromCharCode(122);
+	sign_glyph[10] = String.fromCharCode(118);
 	sign_glyph[11] = String.fromCharCode(120);
 	sign_glyph[12] = String.fromCharCode(99);
 
@@ -100,11 +100,19 @@ function astro_glyph(type, idx) {
 	return '';
 };
 
-function drawNatalChart(id, radius, longitude, houses, south, options) {
+function drawNatalChart(id, radius, params, options) {
+	var longitude = params.longitude;
+	var houses = params.houses;
+	var retrogrades = params.retrogrades;
+	var south = params.south;
+
 	var defaults = {red : "red",
+					aspect_red: "red",
 					green : "green",
+					aspect_green: "green",
 					orange : "orange",
 					blue:"blue",
+					aspect_blue: "blue",
 					outer_color : "yellow",
 					outer_text_color : "black",
 					inner_color : "green",
@@ -122,7 +130,8 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 					planetHover: undefined,
 					conjunctionHover: undefined};
 
-	var settings = utils.extend(defaults, options);
+	var settings = utils.extend(defaults, {outer_text_stroke: options.outer_color | defaults.outer_color, inner_text_stroke: options.inner_color | defaults.inner_color}, options);
+
 
 	var Ascendant = houses[1];
 
@@ -140,18 +149,16 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 
 	var outer2_radius=radius;
 	var outer2_thick = radius*35/300;
-	var inner_radius = radius*120/300;
-	var inner_thick = radius*20/300;
-	var big_gliph = radius*25/300;
+	var inner_radius = outer2_radius/3;
+	var inner_thick = 2*outer2_thick/3;
+	var big_gliph = radius*27/300;
 	var mid_gliph = radius*20/300;
-	var small_gliph = radius*12/300;
+	var small_gliph = radius*15/300;
 	var tiny_text = radius*10/300;
 
 	var fsize = 2*(outer2_radius+outer2_thick);
 	var center_x = fsize/2;
 	var center_y = fsize/2;
-
-	var retrograde = "rrrrrrrrrrrrrrr";
 
 	var conjunctions = [];
 	var planets = [];
@@ -180,16 +187,17 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 	var i;
 	var last_angle = south?180:360;
 	var sign_pos = Math.floor(houses[1]/30)+1;
-  var degmin = 	displayDegMinute(houses[1], center_x-outer2_radius-2*radius/30,center_y,(south)?180:0, 1);
-					  var glyph = paper.print(center_x-outer2_radius-(radius/10),center_y, astro_glyph('sign',sign_pos), hamburg, big_gliph)
-		.attr({fill: color(sign_pos)});
+	var degmin = 	displayDegMinute(houses[1], center_x-outer2_radius-2*radius/30,center_y,(south)?180:0, 1);
+	var glyph = paper.print(center_x-outer2_radius-(radius/10),center_y, astro_glyph('sign',sign_pos), hamburg, big_gliph)
+		.attr({fill: color(sign_pos), stroke: settings.outer_text_stroke, 'stroke-width': .5});
 		  if(south) glyph.transform('r180,'+center_x+','+center_y+'r180');
 	glyph.node.id= "house-0";
 	glyph.id= "house-0";
 	if(settings.houseHover != null) {
 		var bbox = glyph.getBBox();
-		glyph = paper.rect(bbox.x, bbox.y, bbox.width, bbox.height)
-			.attr({fill: "white", stroke: 'none', 'fill-opacity': 0})
+		var boxw = Math.max(bbox.width, bbox.height);
+		glyph = paper.rect(bbox.x+(bbox.x<0?1:-1)*5, bbox.y+(bbox.y<0?1:-1)*5, boxw+5, boxw+5)
+			.attr({fill: "white", stroke: 'none', 'fill-opacity':0})
 			.hover(
 				function(evt) {settings.houseHover.f_in({house: 0, degree: degmin[0], minute: degmin[1], sign: sign_pos, color: color(sign_pos)}, evt);},
 				function(evt) {settings.houseHover.f_out({house: 0, degree: degmin[0], minute: degmin[1], sign: sign_pos, color: color(sign_pos)}, evt);}
@@ -220,20 +228,21 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 		last_angle=angle;
 
 		//house number
-		paper.text(center_x-inner_radius-radius/30,center_y, i-1)
-			.attr({fill: inner_text_color, 'font-size': small_gliph})
+		paper.text(center_x-inner_radius-inner_thick/2,center_y, i-1)
+			.attr({fill: inner_text_color, 'font-size': small_gliph, stroke: settings.inner_text_stroke, 'stroke-width': .5})
 		.transform("r"+midAngle+","+center_x+","+center_y+"r"+(-midAngle));
 
 		degmin = displayDegMinute(houses[i], center_x-outer2_radius-2*radius/30,center_y, angle, i);
 
 		//house glyph
 		glyph = paper.print(center_x-outer2_radius-radius/10,center_y, astro_glyph('sign',sign_pos), hamburg, big_gliph).transform("r"+angle+","+center_x+","+center_y+"r-"+(angle))
-			.attr({fill: color(sign_pos)});
+			.attr({fill: color(sign_pos), stroke: settings.outer_text_stroke, 'stroke-width': .5});
 		glyph.node.id= "house-"+i;
 		glyph.id= "house-"+i;
 		if(settings.houseHover != null) {
-			bbox = glyph.getBBox();
-			glyph = paper.rect(bbox.x-5, bbox.y-5, bbox.width+5, bbox.height+5)
+			var bbox = glyph.getBBox();
+			var boxw = Math.max(bbox.width, bbox.height);
+			glyph = paper.rect(bbox.x+(bbox.x<0?1:-1)*5, bbox.y+(bbox.y<0?1:-1)*5, boxw+5, boxw+5)
 				.attr({fill: "white", stroke: 'none', 'fill-opacity':0})
 				.hover(
 					utils.mkClosure({house: i, degree: degmin[0], minute: degmin[1], sign: sign_pos, color: color(sign_pos)}, function(hs, evt, el) {settings.houseHover.f_in(hs, evt, el);}),
@@ -246,8 +255,8 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 	var midAngle;
 	midAngle = last_angle/2;
 	if(south) midAngle = 180+(last_angle-180)/2;
-	paper.text(center_x-inner_radius-radius/30,center_y, 12)
-		.attr({fill: inner_text_color, 'font-size': small_gliph})
+	paper.text(center_x-inner_radius-inner_thick/2,center_y, 12)
+		.attr({fill: inner_text_color, 'font-size': small_gliph, stroke: settings.inner_text_stroke, 'stroke-width': .5})
 		.transform("r"+midAngle+","+center_x+","+center_y+"r-"+(midAngle));
 
 	longitude.sort(function(a, b) {return multiplier*a.angle-multiplier*b.angle;});
@@ -256,11 +265,14 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 	var lastArc = true; //true: top, false: bottom
 	var lastTopBbox;
 	var lastBottomBBox;
-	var topArc = outer2_radius-5;
-	var bottomArc = (outer2_radius+inner_radius+5)/2;
+	var topArc = outer2_radius-2;
+	var bottomArc = (outer2_radius+inner_radius+12)/2;
 	for(i=0; i<longitude.length; i++) {
 		if(longitude[i] != undefined) {
 			var angle = -(longitude[i].angle-Ascendant);
+			if(longitude[i].planet == 15 || longitude[i].planet == 16) {
+				angle -= multiplier*3;
+			}
 			if(south) angle = 180-angle;
 
 			degmin = degMinute(longitude[i].angle);
@@ -272,9 +284,8 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 			longitude[i].retrograde = isRetrograde;
 			planets[longitude[i].planet] = longitude[i];
 
-			var isRetrograde = retrograde.substring(longitude[i].planet,longitude[i].planet+1).toUpperCase() === 'R';
+			var isRetrograde = retrogrades != null && retrogrades.substring(longitude[i].planet,longitude[i].planet+1).toUpperCase() === 'R';
 
-			if(longitude[i].planet != 15 && longitude[i].planet!= 16) {
 				var straight = Ascendant-longitude[i].angle;
 				if(south) straight = 180-straight;
 				last_angle = angle;
@@ -283,7 +294,7 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 
 				var arc = topArc;
 				//planet
-				glyph = paper.print(center_x-topArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
+				glyph = paper.print(center_x-topArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,big_gliph)
 					.attr({fill: text_color})
 					.transform("r"+angle+","+center_x+","+center_y+"r-"+(straight));
 				//check if we are stepping on something
@@ -292,7 +303,7 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 				if((lastArc && lastTopBbox != undefined && Raphael.isBBoxIntersect(bbox, lastTopBbox))) {
 					//there is no space on the top line, so try the bottom arc
 					glyph.remove();
-					glyph = paper.print(center_x-bottomArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
+					glyph = paper.print(center_x-bottomArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,big_gliph)
 						.attr({fill: text_color})
 						.transform("r"+angle+","+center_x+","+center_y+"r-"+(straight));
 					bbox = glyph.getBBox();
@@ -305,13 +316,13 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 							if(lastArc) {
 								arc = bottomArc;
 								//the last we put was at the top, so there will be more place at the bottom
-								glyph = paper.print(center_x-bottomArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
+								glyph = paper.print(center_x-bottomArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,big_gliph)
 									.attr({fill: text_color})
 									.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 							} else {
 								arc = topArc;
 								//the last we put was at the top, so there will be more place at the bottom
-								glyph = paper.print(center_x-topArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,mid_gliph)
+								glyph = paper.print(center_x-topArc,center_y, astro_glyph('planet',longitude[i].planet), hamburg,big_gliph)
 									.attr({fill: text_color})
 									.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 							}
@@ -339,7 +350,8 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 				glyph.id= "planet-"+longitude[i].planet;
 
 				if(settings.planetHover != null) {
-					glyph = paper.rect(bbox.x-5, bbox.y-5, bbox.width+5, bbox.height+5)
+					var boxw = Math.max(bbox.width, bbox.height);
+					glyph = paper.rect(bbox.x+(bbox.x<0?1:-1)*5, bbox.y+(bbox.y<0?1:-1)*5, boxw+5, boxw+5)
 						.attr({fill: "white", stroke: 'none', 'fill-opacity':0})
 						.hover(
 							utils.mkClosure(longitude[i], function(pl, evt, el) {if(settings.planetHover.f_in != undefined) settings.planetHover.f_in(pl, evt, el);}),
@@ -351,24 +363,23 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 
 
 				//degree
-				paper.text(center_x-arc+(mid_gliph+mid_gliph/4),center_y, degmin[0]+String.fromCharCode(176))
+				paper.text(center_x-arc+(big_gliph+mid_gliph/6),center_y, degmin[0]+String.fromCharCode(176))
 					.attr({'font-size': tiny_text, fill: text_color})
 					.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 				//sign
-				paper.print(center_x-arc+(mid_gliph+small_gliph),center_y, astro_glyph('sign',sign_pos), hamburg, small_gliph)
+				paper.print(center_x-arc+(big_gliph+2*small_gliph/3),center_y, astro_glyph('sign',sign_pos), hamburg, small_gliph)
 					.attr({fill: color(sign_pos)})
 					.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 				//minutes
-				paper.text(center_x-arc+(mid_gliph+2*small_gliph+mid_gliph/3),center_y, degmin[1]+String.fromCharCode(39))
+				paper.text(center_x-arc+(big_gliph+2*small_gliph),center_y, degmin[1]+String.fromCharCode(39))
 					.attr({'font-size': tiny_text, fill: text_color})
 					.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 				//Rx symbol
 				if(isRetrograde) {
-					paper.print(center_x-arc+(mid_gliph+3*small_gliph+mid_gliph/5),center_y, String.fromCharCode(62), hamburg, small_gliph)
+					paper.print(center_x-arc+(big_gliph+2*small_gliph+2*tiny_text/3),center_y, String.fromCharCode(62), hamburg, tiny_text)
 						.attr({fill: red})
 						.transform("r"+(angle+multiplier*mvAngle)+","+center_x+","+center_y+"r-"+(straight));
 				}
-			}
 
 			//draw lines
 			var j;
@@ -379,12 +390,12 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 
 				if (q > 0) {
 					var aspect_color;
-					if (q == 1 || q == 3 || q == 6) {
-						aspect_color = green;
-					} else if (q == 4 || q == 2) {
-						aspect_color = red;
+					if ( q == 3 || q == 6) {
+						aspect_color = settings.aspect_blue;
+					} else if (q == 1 || q == 4 || q == 2) {
+						aspect_color = settings.aspect_red;
 					} else if (q == 5) {
-						aspect_color = blue;
+						aspect_color = settings.aspect_green;
 					}
 
 					if (q != 1 &&
@@ -396,41 +407,42 @@ function drawNatalChart(id, radius, longitude, houses, south, options) {
 						!isPof(longitude[i]) &&
 						!isPof(longitude[j])) {
 
-						if(longitude[i].planet != 15 &&
-						   longitude[i].planet != 16 &&
-						   longitude[j].planet != 15 &&
-						   longitude[j].planet != 16) {
-
 							x1 = (inner_radius) * Math.cos(utils.deg2rad(multiplier*((south?-180:0)+longitude[i].angle-Ascendant)));
 							var y1 = (inner_radius) * Math.sin(utils.deg2rad(multiplier*((south?-180:0)+longitude[i].angle-Ascendant)));
 							x2 = (inner_radius) * Math.cos(utils.deg2rad(multiplier*((south?-180:0)+longitude[j].angle-Ascendant)));
 							var y2 = (inner_radius) * Math.sin(utils.deg2rad(multiplier*((south?-180:0)+longitude[j].angle-Ascendant)));
 							var line = utils.drawLine(center_x-x1,center_y+y1,center_x-x2,center_y+y2, paper, aspect_color);
+
+							var len = line.getTotalLength();
+							var p1 = line.getPointAtLength((len/2)-tiny_text);
+							var p2 = line.getPointAtLength((len/2)+tiny_text);
+							var p3 = line.getPointAtLength((len/2));
+							var hide = utils.drawLine(p1.x,p1.y,p2.x,p2.y, paper, settings.inner_background_color)
+								.attr({'stroke-width': 2});
+							glyph = paper.print(p3.x-tiny_text/2,p3.y, astro_glyph('aspect',q), hamburg, tiny_text)
+								.attr({fill: aspect_color});
+
+							glyph.node.id="conjunction-glyph"+longitude[i].planet+"t"+longitude[j].planet;
+							glyph.id="conjunction-glyph"+longitude[i].planet+"t"+longitude[j].planet;
+
+							hide.node.id="conjunction-hide"+longitude[i].planet+"t"+longitude[j].planet;
+							hide.id="conjunction-hide"+longitude[i].planet+"t"+longitude[j].planet;
+
 							line.node.id="conjunction"+longitude[i].planet+"t"+longitude[j].planet;
 							line.id="conjunction"+longitude[i].planet+"t"+longitude[j].planet;
-							var conj = {planet1: longitude[i].planet, planet2: longitude[j].planet, aspect: q};
+							var conj = {planet1: longitude[i].planet, planet2: longitude[j].planet, aspect: q, aspect_color: aspect_color};
 							if(settings.conjunctionHover != undefined) {
 								line.hover(
 									utils.mkClosure(conj, function(pl, evt, t) {settings.conjunctionHover.f_in(pl, evt, t);}),
 									utils.mkClosure(conj, function(pl, evt, el) {settings.conjunctionHover.f_out(pl, evt, el);})
 								);
 							}
-						}
+
 						if(conjunctions[longitude[i].planet] == undefined) conjunctions[longitude[i].planet] = [];
-						conjunctions[longitude[i].planet][longitude[j].planet] = q;
+						conjunctions[longitude[i].planet][longitude[j].planet] = conj;
 					}
 				}
 			}
-		}
-	}
-
-	var k = 0;
-	for(k=1;k<7;k++) {
-		if(k!=5) {
-			glyph = paper.print(center_x-big_gliph/2,center_y, astro_glyph('aspect',k), hamburg, big_gliph)
-				.attr({fill: "black", 'fill-opacity': 0});
-			glyph.node.id="aspect-"+k;
-			glyph.id="aspect-"+k;
 		}
 	}
 
